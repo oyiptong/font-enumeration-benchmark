@@ -17,10 +17,10 @@ function run(runName, metrics) {
   if (runName == 'async') {
     return countAsync(runs, metrics);
   } else if (runName == 'sync'){
-    return count(runs, metrics, /*show=*/false, /*runNameOverride=*/null);
+    return count(runs, metrics, /*runNameOverride=*/null);
   } else {
     // Priming the cache.
-    return count(1, /*metrics=*/null, /*show=*/false, /*runNameOverride=*/runName);
+    return count(1, /*metrics=*/null, /*runNameOverride=*/runName);
   }
 }
 
@@ -81,7 +81,7 @@ function updateMetrics(testName, elapsed, metrics) {
   metrics.push(data);
 }
 
-function updateRunsTable(runName, count, elapsed, totalBytes) {
+function updateRunsTable(runName, count, elapsed) {
   const table = document.querySelector("#runs tbody");
   const row = document.createElement("tr");
   const runsCell = document.createElement("td");
@@ -94,13 +94,11 @@ function updateRunsTable(runName, count, elapsed, totalBytes) {
   countCell.innerText = count;
   elapsedCell.innerText = `${elapsed} ms`; // Already rounded before.
   perRunElapsedCell.innerText = `${(elapsed / count).toFixed(2)} ms`;
-  bytesCell.innerText = totalBytes;
 
   row.appendChild(runsCell);
   row.appendChild(countCell);
   row.appendChild(elapsedCell);
   row.appendChild(perRunElapsedCell);
-  row.appendChild(bytesCell);
 
   table.appendChild(row);
 }
@@ -115,10 +113,9 @@ function updateElapsed(runName, count, elapsed, metrics = null) {
 
 }
 
-async function countAsync(runs = 1, metrics = null, show = false) {
+async function countAsync(runs = 1, metrics = null) {
   const table = document.querySelector("#fonts tbody");
   let overall_start = performance.now();
-  let total_bytes = 0;
   for (let i = 0; i < runs; i++) {
     let start = performance.now();
     for await (const entry of navigator.fonts.query()) {
@@ -128,14 +125,11 @@ async function countAsync(runs = 1, metrics = null, show = false) {
     updateElapsed("async", runs, elapsed, metrics);
   }
   let overall_elapsed = performance.now() - overall_start;
-  updateRunsTable("async", runs, overall_elapsed.toFixed(2), total_bytes);
+  updateRunsTable("async", runs, overall_elapsed.toFixed(2));
 
-  if (show) {
-    table.setAttribute("display: block");
-  }
   return metrics;
 }
 
-function count(runs = 1, metrics = null, show = false, runNameOverride = null) {
+function count(runs = 1, metrics = null, runNameOverride = null) {
   return metrics;
 }
